@@ -19,6 +19,6 @@ from app1.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('news/', NewsAPIView.as_view(), name='news'),
+    path('', NewsAPIView.as_view(), name='news'),
     path('news/<int:pk>/', NewAPIView.as_view(), name='new'),
 ]

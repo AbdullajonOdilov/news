@@ -1,15 +1,25 @@
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, filters
-# from rest_framework.authentication import TokenAuthentication
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from .models import News
+from rest_framework.pagination import PageNumberPagination
+from .pagination import CustomPagination
 from .serializers import NewsSerializer
+from .models import News
 
 class NewsAPIView(APIView):
+
     # authentication_classes = (TokenAuthentication,)
+    pagination_class = CustomPagination
     permission_classes = [IsAuthenticated,]
-    ordering_fields = ['name']
+    filter_backends = [OrderingFilter, SearchFilter]
+    search_fields = ['name']
+    ordering_fields = ['-date']
+    pagination_class = PageNumberPagination
+    pagination_class.page_size = 5
+
+
 
     def get(self, request):
         news = News.objects.all().order_by('-date')
@@ -24,6 +34,12 @@ class NewsAPIView(APIView):
         return Response(ser.errors)
 class NewAPIView(APIView):
     permission_classes = [IsAuthenticated,]
+
+    def get(self,request,pk):
+        news = News.objects.filter(id=pk)
+        ser = NewsSerializer(news, many=True)
+        return Response(ser.data)
+
 
     def put(self, request, pk):
         new = News.objects.get(id=pk, user=request.user)
